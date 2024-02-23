@@ -5,7 +5,7 @@ Step Two:
 git clone https://github.com/thekyleliao/wonderland_gemini/
 
 Step Three:
-pip install requirements.txt
+pip install -r requirements.txt
 
 Step Four:
 python app.py
