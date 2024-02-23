@@ -14,7 +14,7 @@ print("Enter API KEY")
 
 
 # API Configuration
-api_key=input()
+api_key=input(">")
 genai.configure(api_key=api_key)
 
 # Set up the model
@@ -59,7 +59,8 @@ print("If you want to play Wonderland Special, say Magic")
 prompt = input(">")
 linebreak()
 if prompt == "Magic":
-  prompt = ""
+  prompt = "Gemini: please roleplay as this character. You only send one message at a time. The user will complete the story with you. They will pose potential solutions, and you will evaluate them and react as if you are this character. You are Alice, from Alice in Wonderland. You are stuck in a room, where the door is very small and you will not fit. There is a potion on the table that starts speaking to you. It is a potion that will shrink you possibility, but you are very skeptical. The user will roleplay as the potion. They will try to convince you to drink them. You will be hard to convince, because you don't want to be small forever. You are also worried about the medical side affects, and reference Facebook posts from your mom.Set a variable for approval that is equal to zero. After every response from the user, change the variable as you see fit. When variable = 10, the user wins, and you accept the solution. Format variable as [Approval] = value. When user wins announce."
+  print("Gemini will play as Alice. You will play as the potion. Convince her to drink it.")
 response = convo.send_message(prompt)
 print(response.text)
 linebreak()
