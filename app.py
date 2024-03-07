@@ -16,20 +16,7 @@ def clear():
   # os.system("cls") # CMD on Windows
 
 
-def init():
-  clear()
-  print("Welcome to Wonderland!\n")
-
-  # API Configuration for API Key
-  if key := os.getenv("GEMINI_API_KEY") is not None:
-    api_key = key
-  elif key := os.getenv("API_KEY") is not None:
-    api_key = key
-  else:
-    print("Environment Variable \"GEMINI_API_KEY\" or \"API_KEY\" not set.")
-    api_key = input("Enter API KEY:\n> ")
-  genai.configure(api_key=api_key)
-
+def setup_model():
   # Set up the model with certain parameters
   generation_config = {
       "temperature": 0.9,
@@ -37,35 +24,35 @@ def init():
       "top_k": 1,
       "max_output_tokens": 2048,
   }
-
+  
   safety_settings = [
-      {
-          "category": "HARM_CATEGORY_HARASSMENT",
-          "threshold": "BLOCK_ONLY_HIGH"
-      },
-      {
-          "category": "HARM_CATEGORY_HATE_SPEECH",
-          "threshold": "BLOCK_ONLY_HIGH"
-      },
-      {
-          "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-          "threshold": "BLOCK_ONLY_HIGH"
-      },
-      {
-          "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-          "threshold": "BLOCK_ONLY_HIGH"
-      },
+      {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_ONLY_HIGH"},
+      {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_ONLY_HIGH"},
+      {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_ONLY_HIGH"},
+      {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_ONLY_HIGH"},
   ]
+  
+  return genai.GenerativeModel(
+      model_name="gemini-1.0-pro",
+      generation_config=generation_config,
+      safety_settings=safety_settings,
+  )
 
-  model = genai.GenerativeModel(model_name="gemini-1.0-pro",
-                                generation_config=generation_config,
-                                safety_settings=safety_settings)
 
-  convo = model.start_chat(history=[])
+def configure_api_key():
+  # Set up the API key
+  if key := os.getenv("GEMINI_API_KEY") is not None:
+    api_key = key
+  elif key := os.getenv("API_KEY") is not None:
+    api_key = key
+  else:
+    print("Environment Variable \"GEMINI_API_KEY\" or \"API_KEY\" not set.")
+    api_key = input("Enter API KEY:\n> ")
+  
+  return api_key
+  
 
-  # "convo" has to be accessed one more time in order for it to work (for some reason)
-  convo
-
+def configure_prompt():
   # Configuring Prompt
   print("Enter in the Prompt")
   print("-" * 55)
@@ -97,7 +84,21 @@ def init():
         "Gemini will play as Alice. You will play as the potion. Convince her to drink it."
     )
 
-  response = convo.send_message(prompt)
+  return prompt
+
+def init():
+  clear()
+  print("Welcome to Wonderland!\n")
+
+  genai.configure(api_key=configure_api_key())
+
+  model = setup_model()
+
+  convo = model.start_chat(history=[])
+  # "convo" has to be accessed one more time in order for it to work (for some reason)
+  convo
+
+  response = convo.send_message(configure_prompt())
   print(response.text)
   linebreak()
   return convo
@@ -112,7 +113,7 @@ def main():
     while prompt.isspace() or not bool(
         prompt):  # false for empty strings and true for nonempty strings
       prompt = input("> ")
-    if prompt.lower() in {"quit", "exit"}:
+    if prompt.lower() in {"quit"}:
       linebreak()
       print("Thanks for playing!")
       break
@@ -122,9 +123,11 @@ def main():
 
 ##### RUN GAME #####
 # Running the game if this is the file being ran
+#   (and not just getting imported to another file)
 if __name__ == "__main__":
   try:
     main()
   except KeyboardInterrupt:
     linebreak()
     print("Thanks for playing!")
+
