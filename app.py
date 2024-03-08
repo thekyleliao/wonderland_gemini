@@ -2,6 +2,7 @@
 # Gemini API
 import google.generativeai as genai
 import os  # for environment variables and OS system commands
+import sys # for optional command-line args
 
 
 ##### FUNCTIONS #####
@@ -40,13 +41,16 @@ def setup_model():
 
 
 def configure_api_key():
+  key_passed_as_arg = len(sys.argv) > 1
   # Set up the API key
-  if key := os.getenv("GEMINI_API_KEY") is not None:
+  if key_passed_as_arg:
+    api_key = sys.argv[1] # second argument is api_key (since first is script name)
+  elif key := os.getenv("GEMINI_API_KEY") is not None:
     api_key = key
   elif key := os.getenv("API_KEY") is not None:
     api_key = key
   else:
-    print("Environment Variable \"GEMINI_API_KEY\" or \"API_KEY\" not set.")
+    print("Environment Variable \"GEMINI_API_KEY\" or \"API_KEY\" not set, nor was the api key passed as an argument.")
     api_key = input("Enter API KEY:\n> ")
   
   return api_key
